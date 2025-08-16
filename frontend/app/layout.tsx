@@ -1,5 +1,7 @@
 import './globals.css';
 import React from 'react';
+import Navbar from '../components/Navbar';
+import { AuthProvider } from '../contexts/AuthContext';
 
 export const metadata = {
   title: 'SIT - Sistem Informasi Transkrip',
@@ -9,18 +11,16 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="id">
-      <body className="font-sans">
-        <nav className="border-b">
-          <div className="container-narrow flex items-center justify-between py-3 text-sm">
-            <div className="font-semibold">SIT</div>
-            <div className="flex gap-4">
-              <a className="link" href="/request">Ajukan Transkrip</a>
-              <a className="link" href="/status">Status Aplikasi</a>
-              <a className="link" href="/login">Masuk</a>
-            </div>
-          </div>
-        </nav>
-        <main className="container-narrow py-8">{children}</main>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+      </head>
+      <body className="font-sans bg-gray-50 min-h-screen">
+        <AuthProvider>
+          <Navbar />
+          <main className="py-8">{children}</main>
+        </AuthProvider>
       </body>
     </html>
   );

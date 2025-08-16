@@ -1,9 +1,18 @@
 import React from 'react';
 
-export default function FormField({ label, children }: { label: string; children: React.ReactNode }) {
+interface FormFieldProps {
+  label: string;
+  children: React.ReactNode;
+  required?: boolean;
+}
+
+export default function FormField({ label, children, required = false }: FormFieldProps) {
   return (
-    <div className="mb-4">
-      <label className="label">{label}</label>
+    <div className="form-field">
+      <label className="label">
+        {label}
+        {required && <span className="text-red-500 ml-1">*</span>}
+      </label>
       {children}
     </div>
   );

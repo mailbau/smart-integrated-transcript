@@ -3,77 +3,225 @@ import { useEffect, useState } from 'react';
 import { api } from '../../lib/api';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function AdminDashboard() {
   const [list, setList] = useState<any[]>([]);
-  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(false);
+  const [stats, setStats] = useState({
+    totalRequests: 0,
+    pendingRequests: 0,
+    completedRequests: 0,
+    totalUsers: 0
+  });
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
 
   useEffect(() => {
+    // Wait for authentication to be checked
+    if (authLoading) {
+      return;
+    }
+
     // Check if user is authenticated and is admin
-    api('/auth/me')
-      .then(response => {
-        if (response.user.role !== 'ADMIN') {
-          router.push('/login');
-          return;
-        }
-        setUser(response.user);
-        // Load requests data
-        return api('/requests');
-      })
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+
+    if (user.role !== 'ADMIN') {
+      router.push('/login');
+      return;
+    }
+
+    // Load requests data
+    setDataLoading(true);
+    api('/requests')
       .then(data => {
         if (data?.requests) {
           setList(data.requests);
+
+          // Calculate stats
+          const totalRequests = data.requests.length;
+          const pendingRequests = data.requests.filter((r: any) => r.status === 'SUBMITTED' || r.status === 'UNDER_REVIEW').length;
+          const completedRequests = data.requests.filter((r: any) => r.status === 'COMPLETED').length;
+
+          setStats({
+            totalRequests,
+            pendingRequests,
+            completedRequests,
+            totalUsers: data.requests.length // This should come from a separate API call
+          });
         }
       })
-      .catch(() => {
-        router.push('/login');
+      .catch((error) => {
+        console.error('Error loading requests:', error);
+        // Don't redirect on data loading error, just show empty state
       })
       .finally(() => {
+        setDataLoading(false);
         setLoading(false);
       });
-  }, [router]);
+  }, [user, authLoading, router]);
 
-  if (loading) {
-    return <div className="py-6">Loading...</div>;
+  const getStatusBadge = (status: string) => {
+    const statusMap: { [key: string]: { label: string; className: string } } = {
+      'SUBMITTED': { label: 'Diajukan', className: 'border-blue-300 bg-blue-50 text-blue-700' },
+      'UNDER_REVIEW': { label: 'Sedang Diproses', className: 'border-yellow-300 bg-yellow-50 text-yellow-700' },
+      'APPROVED': { label: 'Disetujui', className: 'border-green-300 bg-green-50 text-green-700' },
+      'REJECTED': { label: 'Ditolak', className: 'border-red-300 bg-red-50 text-red-700' },
+      'COMPLETED': { label: 'Selesai', className: 'border-green-300 bg-green-50 text-green-700' }
+    };
+
+    const statusInfo = statusMap[status] || { label: status, className: 'border-gray-300 bg-gray-50 text-gray-700' };
+    return (
+      <span className={`badge ${statusInfo.className}`}>
+        {statusInfo.label}
+      </span>
+    );
+  };
+
+  // Show loading while auth is being checked
+  if (authLoading || loading) {
+    return (
+      <div className="container-narrow py-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="text-gray-600 mt-4">Memuat dashboard...</p>
+        </div>
+      </div>
+    );
   }
 
-  if (!user) {
+  // Don't render anything if not authenticated or not admin
+  if (!user || user.role !== 'ADMIN') {
     return null;
   }
 
-  const stat = (label: string, value: string | number) => (
-    <div className="card">
-      <div className="text-xs text-gray-500">{label}</div>
-      <div className="text-2xl font-semibold">{value}</div>
-    </div>
-  );
-
   return (
-    <div className="py-6">
-      <h1 className="text-xl font-semibold mb-4">Dasbor Admin</h1>
-      <div className="grid grid-cols-3 gap-4">
-        {stat('Permohonan Saat Ini', list.length)}
-        {stat('Pengguna Terdaftar', '—')}
-        {stat('Transkrip Terverifikasi', list.filter(r => r.status === 'COMPLETED').length)}
-      </div>
-      <div className="card mt-6">
-        <div className="font-medium mb-2">Permohonan Terbaru</div>
-        <table className="table">
-          <thead><tr><th>ID Aplikasi</th><th>Nama Pengguna</th><th>Tanggal</th><th>Status</th><th></th></tr></thead>
-          <tbody>
-            {list.map(r => (
-              <tr key={r.id}>
-                <td>{r.id}</td>
-                <td>{r.user?.name}</td>
-                <td>{new Date(r.createdAt).toLocaleDateString()}</td>
-                <td><span className="badge border-gray-300">{r.status}</span></td>
-                <td><Link className="link" href={`/admin/requests/${r.id}`}>Detail</Link></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="container-narrow py-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard Admin</h1>
+          <p className="text-gray-600">Kelola permohonan transkrip dan pantau statistik sistem</p>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="card text-center">
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-1">{stats.totalRequests}</h3>
+            <p className="text-sm text-gray-600">Total Permohonan</p>
+          </div>
+
+          <div className="card text-center">
+            <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-1">{stats.pendingRequests}</h3>
+            <p className="text-sm text-gray-600">Menunggu Proses</p>
+          </div>
+
+          <div className="card text-center">
+            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-1">{stats.completedRequests}</h3>
+            <p className="text-sm text-gray-600">Selesai Diproses</p>
+          </div>
+
+          <div className="card text-center">
+            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+              </svg>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-1">{stats.totalUsers}</h3>
+            <p className="text-sm text-gray-600">Total Pengguna</p>
+          </div>
+        </div>
+
+        {/* Recent Requests Table */}
+        <div className="card">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-gray-900">Permohonan Terbaru</h2>
+            <div className="text-sm text-gray-500">
+              Menampilkan {list.length} permohonan terbaru
+            </div>
+          </div>
+
+          {dataLoading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="text-gray-600 mt-2">Memuat data permohonan...</p>
+            </div>
+          ) : list.length === 0 ? (
+            <div className="text-center py-8">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Belum ada permohonan</h3>
+              <p className="text-gray-500">Belum ada permohonan transkrip yang diajukan</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="table w-full">
+                <thead>
+                  <tr>
+                    <th>ID Aplikasi</th>
+                    <th>Nama Pengguna</th>
+                    <th>Jenis Transkrip</th>
+                    <th>Tanggal Pengajuan</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {list.slice(0, 10).map(r => (
+                    <tr key={r.id} className="hover:bg-gray-50">
+                      <td className="font-mono text-sm">{r.id.slice(-8)}</td>
+                      <td>
+                        <div>
+                          <div className="font-medium text-gray-900">{r.user?.name || 'N/A'}</div>
+                          <div className="text-sm text-gray-500">{r.user?.email || 'N/A'}</div>
+                        </div>
+                      </td>
+                      <td className="text-sm text-gray-900">{r.type}</td>
+                      <td className="text-sm text-gray-600">
+                        {new Date(r.createdAt).toLocaleDateString('id-ID', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        })}
+                      </td>
+                      <td>{getStatusBadge(r.status)}</td>
+                      <td>
+                        <Link
+                          href={`/admin/requests/${r.id}`}
+                          className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+                        >
+                          Lihat Detail
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
