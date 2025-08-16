@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum RequestStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  nim       String
+  dob       DateTime
+  email     String   @unique
+  password  String
+  role      Role     @default(USER)
+  createdAt DateTime @default(now())
+  requests  Request[]
+}
+
+model Request {
+  id            String        @id @default(cuid())
+  user          User          @relation(fields: [userId], references: [id])
+  userId        String
+  course        String
+  purpose       String
+  type          String        // "Ijazah & SKTL" etc.
+  status        RequestStatus @default(SUBMITTED)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  transcriptUrl String?
+  transcriptKey String?
+  fileSize      Int?          // bytes of uploaded transcript (admin upload)
+}
