@@ -13,7 +13,7 @@ export async function register(req: Request, res: Response) {
       data: { name, nim, dob: new Date(dob), email, password: hashed }
     });
     const token = signJwt({ userId: user.id });
-    res.cookie('token', token, { httpOnly: true, sameSite: 'lax' });
+    res.cookie('token', token, { httpOnly: true, sameSite: 'none', secure: true });
     res.json({ user: { id: user.id, name: user.name, email: user.email, role: user.role } });
   } catch (e: any) {
     res.status(400).json({ message: e.message });
@@ -27,7 +27,7 @@ export async function login(req: Request, res: Response) {
   const ok = await comparePassword(password, user.password);
   if (!ok) return res.status(400).json({ message: 'Invalid credentials' });
   const token = signJwt({ userId: user.id });
-  res.cookie('token', token, { httpOnly: true, sameSite: 'lax' });
+  res.cookie('token', token, { httpOnly: true, sameSite: 'none', secure: true });
   res.json({ user: { id: user.id, name: user.name, email: user.email, role: user.role } });
 }
 

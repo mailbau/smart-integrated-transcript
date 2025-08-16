@@ -7,7 +7,7 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
     const token = req.cookies?.token || (req.headers.authorization || '').replace('Bearer ', '');
     if (!token) return res.status(401).json({ message: 'Unauthenticated' });
     const payload = verifyJwt<{ userId: string }>(token);
-    const user = await prisma.user.findUnique({ where: { id: payload.userId }});
+    const user = await prisma.user.findUnique({ where: { id: payload.userId } });
     if (!user) return res.status(401).json({ message: 'Invalid token' });
     (req as any).user = user;
     next();
