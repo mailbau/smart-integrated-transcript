@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { api, downloadFile } from '../../lib/api';
+import { api } from '../../lib/api';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -89,19 +89,19 @@ export default function StatusPage() {
     return (
         <div className="container-narrow py-8">
             <div className="text-center mb-8">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">Status Aplikasi Transkrip</h1>
-                <p className="text-gray-600">Lihat status permohonan transkrip Anda</p>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-900 to-indigo-900 bg-clip-text text-transparent mb-2">Status Aplikasi Transkrip</h1>
+                <p className="text-blue-700">Lihat status permohonan transkrip Anda</p>
             </div>
 
             {requests.length === 0 ? (
                 <div className="card text-center">
-                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="w-16 h-16 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                     </div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Belum ada permohonan</h3>
-                    <p className="text-gray-500 mb-6">Anda belum mengajukan permohonan transkrip</p>
+                    <h3 className="text-lg font-medium text-blue-900 mb-2">Belum ada permohonan</h3>
+                    <p className="text-blue-600 mb-6">Anda belum mengajukan permohonan transkrip</p>
                     <Link href="/request" className="btn">
                         Ajukan Transkrip Pertama
                     </Link>
@@ -154,21 +154,7 @@ export default function StatusPage() {
                                 >
                                     Lihat Detail
                                 </Link>
-                                {request.transcriptUrl && (
-                                    <button
-                                        onClick={async () => {
-                                            try {
-                                                await downloadFile(request.id, request.transcriptUrl);
-                                            } catch (error) {
-                                                console.error('Download failed:', error);
-                                                alert('Gagal mengunduh transkrip. Silakan coba lagi.');
-                                            }
-                                        }}
-                                        className="btn-success"
-                                    >
-                                        Unduh Transkrip
-                                    </button>
-                                )}
+
                             </div>
                         </div>
                     ))}

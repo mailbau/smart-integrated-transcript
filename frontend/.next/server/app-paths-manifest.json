@@ -1,8 +1,7 @@
 {
-  "/status/page": "app/status/page.js",
-  "/login/page": "app/login/page.js",
   "/admin/requests/[id]/page": "app/admin/requests/[id]/page.js",
-  "/admin/page": "app/admin/page.js",
-  "/admin/users/page": "app/admin/users/page.js",
-  "/request/page": "app/request/page.js"
+  "/status/page": "app/status/page.js",
+  "/status/[id]/page": "app/status/[id]/page.js",
+  "/request/page": "app/request/page.js",
+  "/admin/page": "app/admin/page.js"
 }

@@ -9,7 +9,7 @@ export default function RequestPage() {
   const [nim, setNim] = useState('');
   const [course, setCourse] = useState('');
   const [purpose, setPurpose] = useState('');
-  const [type, setType] = useState('Ijazah & SKTL');
+  const [type, setType] = useState('Sidang (Sempro, Semhas, Munaqasyah, Kolokium)');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
@@ -80,8 +80,8 @@ export default function RequestPage() {
     <div className="container-narrow py-8">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Ajukan Transkrip</h1>
-          <p className="text-gray-600">Isi formulir di bawah untuk mengajukan permohonan transkrip</p>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-900 to-indigo-900 bg-clip-text text-transparent mb-2">Ajukan Transkrip</h1>
+          <p className="text-blue-700">Isi formulir di bawah untuk mengajukan permohonan transkrip</p>
         </div>
 
         <div className="card">
@@ -91,23 +91,23 @@ export default function RequestPage() {
             <div className="flex space-x-2">
               <button
                 type="button"
-                onClick={() => setType('Ijazah & SKTL')}
-                className={`flex-1 py-3 px-4 rounded-lg border-2 text-sm font-medium transition-all duration-200 ${type === 'Ijazah & SKTL'
-                  ? 'border-blue-600 bg-blue-600 text-white'
-                  : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
+                onClick={() => setType('Sidang (Sempro, Semhas, Munaqasyah, Kolokium)')}
+                className={`flex-1 py-3 px-4 rounded-xl border-2 text-sm font-medium transition-all duration-300 ${type === 'Sidang (Sempro, Semhas, Munaqasyah, Kolokium)'
+                  ? 'border-blue-600 bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg'
+                  : 'border-blue-200 bg-white/95 backdrop-blur-sm text-blue-700 hover:border-blue-400 hover:bg-blue-50/50'
                   }`}
               >
-                Ijazah & SKTL
+                Sidang (Sempro, Semhas, Munaqasyah, Kolokium)
               </button>
               <button
                 type="button"
-                onClick={() => setType('Hilang/Rusak/Legalisir')}
-                className={`flex-1 py-3 px-4 rounded-lg border-2 text-sm font-medium transition-all duration-200 ${type === 'Hilang/Rusak/Legalisir'
-                  ? 'border-blue-600 bg-blue-600 text-white'
-                  : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
+                onClick={() => setType('Wisuda dan SKTL')}
+                className={`flex-1 py-3 px-4 rounded-xl border-2 text-sm font-medium transition-all duration-300 ${type === 'Wisuda dan SKTL'
+                  ? 'border-blue-600 bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg'
+                  : 'border-blue-200 bg-white/95 backdrop-blur-sm text-blue-700 hover:border-blue-400 hover:bg-blue-50/50'
                   }`}
               >
-                Hilang/Rusak/Legalisir
+                Wisuda dan SKTL
               </button>
             </div>
           </div>

@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { api } from '../lib/api';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../contexts/AuthContext';
+import Image from 'next/image';
 
 export default function Navbar() {
     const { user, loading, logout } = useAuth();
@@ -21,24 +22,30 @@ export default function Navbar() {
     };
 
     return (
-        <nav className="bg-white border-b border-gray-200 shadow-sm">
+        <nav className="bg-gradient-to-r from-blue-50/95 via-indigo-50/95 to-blue-100/95 backdrop-blur-md border-b border-blue-200/30 shadow-xl">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
                     <div className="flex items-center space-x-8">
                         <div className="flex items-center">
-                            <div className="text-2xl font-bold text-blue-600">SIT</div>
+                            <Image
+                                src="/assets/sit_logo.png"
+                                alt="SIT Logo"
+                                width={120}
+                                height={40}
+                                className="h-10 w-auto"
+                            />
                         </div>
                         {user && (
                             <div className="hidden md:flex items-center space-x-6">
                                 {user.role === 'ADMIN' ? (
                                     <>
-                                        <a href="/admin" className="nav-link">Dashboard Admin</a>
-                                        <a href="/admin/users" className="nav-link">Kelola Pengguna</a>
+                                        <a href="/admin" className="nav-link hover:text-blue-700 hover:bg-blue-100/50 px-3 py-2 rounded-lg transition-all duration-300">Dashboard Admin</a>
+                                        <a href="/admin/users" className="nav-link hover:text-blue-700 hover:bg-blue-100/50 px-3 py-2 rounded-lg transition-all duration-300">Kelola Pengguna</a>
                                     </>
                                 ) : (
                                     <>
-                                        <a href="/request" className="nav-link">Ajukan Transkrip</a>
-                                        <a href="/status" className="nav-link">Status Aplikasi</a>
+                                        <a href="/request" className="nav-link hover:text-blue-700 hover:bg-blue-100/50 px-3 py-2 rounded-lg transition-all duration-300">Ajukan Transkrip</a>
+                                        <a href="/status" className="nav-link hover:text-blue-700 hover:bg-blue-100/50 px-3 py-2 rounded-lg transition-all duration-300">Status Aplikasi</a>
                                     </>
                                 )}
                             </div>
@@ -58,8 +65,8 @@ export default function Navbar() {
                                 </div>
                                 <div className="relative group">
                                     <button className="flex items-center space-x-2 text-gray-700 hover:text-gray-900 transition-colors duration-200">
-                                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                                            <span className="text-sm font-medium text-blue-600">
+                                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center shadow-md">
+                                            <span className="text-sm font-medium text-white">
                                                 {user.name.charAt(0).toUpperCase()}
                                             </span>
                                         </div>
@@ -67,7 +74,7 @@ export default function Navbar() {
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                         </svg>
                                     </button>
-                                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                                    <div className="absolute right-0 mt-2 w-48 bg-white/95 backdrop-blur-md rounded-xl shadow-xl border border-blue-200/30 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
                                         <div className="py-1">
                                             <div className="px-4 py-2 text-sm text-gray-700 border-b border-gray-100">
                                                 <div className="font-medium">{user.name}</div>
@@ -75,7 +82,7 @@ export default function Navbar() {
                                             </div>
                                             <button
                                                 onClick={handleLogout}
-                                                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200"
+                                                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-all duration-300 rounded-lg mx-2"
                                             >
                                                 Keluar
                                             </button>
@@ -85,8 +92,8 @@ export default function Navbar() {
                             </div>
                         ) : (
                             <>
-                                <a href="/login" className="nav-link">Masuk</a>
-                                <a href="/register" className="btn">Daftar</a>
+                                <a href="/login" className="nav-link hover:text-blue-700 hover:bg-blue-100/50 px-3 py-2 rounded-lg transition-all duration-300">Masuk</a>
+                                <a href="/register" className="btn hover:bg-gradient-to-r hover:from-blue-600 hover:to-indigo-600 hover:shadow-xl transition-all duration-300">Daftar</a>
                             </>
                         )}
                     </div>
@@ -116,11 +123,11 @@ export default function Navbar() {
 
                 {/* Mobile menu */}
                 {mobileMenuOpen && (
-                    <div className="md:hidden border-t border-gray-200">
+                    <div className="md:hidden border-t border-blue-200/30">
                         <div className="px-2 pt-2 pb-3 space-y-1">
                             {user ? (
                                 <>
-                                    <div className="px-3 py-2 text-sm text-gray-700 border-b border-gray-100 mb-2">
+                                    <div className="px-3 py-2 text-sm text-gray-700 border-b border-blue-100 mb-2">
                                         <div className="font-medium">{user.name}</div>
                                         <div className="text-gray-500">{user.email}</div>
                                     </div>
@@ -128,14 +135,14 @@ export default function Navbar() {
                                         <>
                                             <a
                                                 href="/admin"
-                                                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md"
+                                                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all duration-300"
                                                 onClick={() => setMobileMenuOpen(false)}
                                             >
                                                 Dashboard Admin
                                             </a>
                                             <a
                                                 href="/admin/users"
-                                                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md"
+                                                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all duration-300"
                                                 onClick={() => setMobileMenuOpen(false)}
                                             >
                                                 Kelola Pengguna
@@ -145,14 +152,14 @@ export default function Navbar() {
                                         <>
                                             <a
                                                 href="/request"
-                                                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md"
+                                                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all duration-300"
                                                 onClick={() => setMobileMenuOpen(false)}
                                             >
                                                 Ajukan Transkrip
                                             </a>
                                             <a
                                                 href="/status"
-                                                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md"
+                                                className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all duration-300"
                                                 onClick={() => setMobileMenuOpen(false)}
                                             >
                                                 Status Aplikasi
@@ -161,7 +168,7 @@ export default function Navbar() {
                                     )}
                                     <button
                                         onClick={handleLogout}
-                                        className="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md"
+                                        className="block w-full text-left px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all duration-300"
                                     >
                                         Keluar
                                     </button>
@@ -170,14 +177,14 @@ export default function Navbar() {
                                 <>
                                     <a
                                         href="/login"
-                                        className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md"
+                                        className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all duration-300"
                                         onClick={() => setMobileMenuOpen(false)}
                                     >
                                         Masuk
                                     </a>
                                     <a
                                         href="/register"
-                                        className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 rounded-md"
+                                        className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all duration-300"
                                         onClick={() => setMobileMenuOpen(false)}
                                     >
                                         Daftar

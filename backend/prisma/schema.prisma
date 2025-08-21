@@ -38,11 +38,20 @@ model Request {
   userId        String
   course        String
   purpose       String
-  type          String        // "Ijazah & SKTL" etc.
+  type          String        // "Sidang (Sempro, Semhas, Munaqasyah, Kolokium)" or "Wisuda dan SKTL"
   status        RequestStatus @default(SUBMITTED)
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
-  transcriptUrl String?
-  transcriptKey String?
-  fileSize      Int?          // bytes of uploaded transcript (admin upload)
+
+  sourceLink    String?       // admin input link to source data → sets UNDER_REVIEW
+  excelLink     String?       // user-submitted excel sheet link → sets APPROVED
+  underReviewAt DateTime?     // when admin set source link (UNDER_REVIEW)
+  approvedAt    DateTime?     // when user submitted excel (APPROVED)
+  completedAt   DateTime?     // when admin verified (COMPLETED)
+}
+
+model Setting {
+  key   String @id
+  value String
+  updatedAt DateTime @updatedAt
 }
