@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { api, downloadFile, getTemplateLink as fetchTemplateLink } from '../../../lib/api';
+import { api, getTemplateLink as fetchTemplateLink } from '../../../lib/api';
 import { useRouter } from 'next/navigation';
 
 export default function StatusPage({ params }: { params: { id: string } }) {
