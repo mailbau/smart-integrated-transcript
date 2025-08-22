@@ -45,6 +45,10 @@ model Request {
 
   sourceLink    String?       // admin input link to source data → sets UNDER_REVIEW
   excelLink     String?       // user-submitted excel sheet link → sets APPROVED
+  excelFile     String?       // R2 key for user uploaded excel file
+  transcriptUrl String?       // R2 URL for admin uploaded transcript
+  transcriptKey String?       // R2 key for admin uploaded transcript
+  fileSize      Int?          // bytes of uploaded transcript (admin upload)
   underReviewAt DateTime?     // when admin set source link (UNDER_REVIEW)
   approvedAt    DateTime?     // when user submitted excel (APPROVED)
   completedAt   DateTime?     // when admin verified (COMPLETED)

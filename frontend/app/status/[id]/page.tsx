@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { api, getTemplateLink as fetchTemplateLink } from '../../../lib/api';
+import { api, getTemplateLink as fetchTemplateLink, uploadExcelFile, downloadFile } from '../../../lib/api';
 import { useRouter } from 'next/navigation';
 
 export default function StatusPage({ params }: { params: { id: string } }) {
@@ -11,6 +11,8 @@ export default function StatusPage({ params }: { params: { id: string } }) {
   const [saving, setSaving] = useState(false);
   const [templateLink, setTemplateLink] = useState<string | null>(null);
   const [excelSubmitted, setExcelSubmitted] = useState(false);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -55,6 +57,31 @@ export default function StatusPage({ params }: { params: { id: string } }) {
       console.error(e);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleFileUpload = async () => {
+    if (!selectedFile) return;
+
+    try {
+      setUploadingFile(true);
+      await uploadExcelFile(params.id, selectedFile);
+      const d = await api(`/requests/${params.id}`);
+      setR(d.request);
+      setExcelSubmitted(true);
+      setSelectedFile(null);
+    } catch (e: any) {
+      console.error('Upload error:', e);
+      alert('Gagal mengunggah file. Silakan coba lagi.');
+    } finally {
+      setUploadingFile(false);
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
     }
   };
 
@@ -176,34 +203,46 @@ export default function StatusPage({ params }: { params: { id: string } }) {
           </div>
         )}
 
-        {/* Excel link input - show when UNDER_REVIEW or APPROVED (before COMPLETED) */}
+        {/* Excel file upload - show when UNDER_REVIEW or APPROVED (before COMPLETED) */}
         {(r.status === 'UNDER_REVIEW' || r.status === 'APPROVED') && (
           <div className="card">
-            <div className="font-semibold mb-2">Unggah Tautan Excel</div>
-            <p className="text-sm text-gray-600 mb-3">Klik tautan di bawah untuk mengunggah tautan Excel Anda.</p>
+            <div className="font-semibold mb-2">Unggah File Excel</div>
+            <p className="text-sm text-gray-600 mb-3">Upload file Excel yang telah diisi sesuai template.</p>
             <div className="space-y-4">
-              <a
-                href="https://forms.gle/12BFpUsomZkY1obG9"
-                target="_blank"
-                rel="noreferrer"
-                className="btn block text-center"
-              >
-                Buka Form Unggah Excel
-              </a>
               {excelSubmitted ? (
                 <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-center">
                   <p className="text-sm text-green-700 font-medium">
-                    ✓ Berhasil! Excel telah dikirim
+                    ✓ Berhasil! File Excel telah diunggah
                   </p>
+                  {r.excelLink && (
+                    <a
+                      href={r.excelLink}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="btn-secondary mt-2 block text-center"
+                    >
+                      Lihat File Excel
+                    </a>
+                  )}
                 </div>
               ) : (
-                <button
-                  className="btn-success w-full"
-                  onClick={submitExcelLink}
-                  disabled={saving}
-                >
-                  {saving ? 'Menyimpan...' : 'Saya Sudah Mengunggah Excel'}
-                </button>
+                <div className="space-y-4">
+                  <div>
+                    <input
+                      type="file"
+                      accept=".xlsx,.xls"
+                      onChange={handleFileSelect}
+                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                    />
+                  </div>
+                  <button
+                    className="btn-success w-full"
+                    onClick={handleFileUpload}
+                    disabled={uploadingFile || !selectedFile}
+                  >
+                    {uploadingFile ? 'Mengunggah...' : 'Upload File Excel'}
+                  </button>
+                </div>
               )}
               <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                 <p className="text-sm text-blue-700">
@@ -262,16 +301,14 @@ export default function StatusPage({ params }: { params: { id: string } }) {
               <div className="text-center">
                 <div className="font-medium text-green-800 mb-2">Transkrip Telah Diverifikasi</div>
                 <p className="text-sm text-green-700 mb-3">
-                  Transkrip yang telah diverifikasi dapat ditemukan di tautan berikut:
+                  Transkrip yang telah diverifikasi dapat diunduh di bawah ini:
                 </p>
-                <a
-                  href="https://bit.ly/3TDKZFn"
-                  target="_blank"
-                  rel="noreferrer"
+                <button
+                  onClick={() => downloadFile(r.id)}
                   className="btn-success"
                 >
-                  Lihat Transkrip di Google Drive
-                </a>
+                  Unduh Transkrip
+                </button>
               </div>
             </div>
           )}

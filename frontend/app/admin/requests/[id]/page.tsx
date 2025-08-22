@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { api, getTemplateLink as fetchTemplateLink } from '../../../../lib/api';
+import { api, getTemplateLink as fetchTemplateLink, uploadTranscriptFile } from '../../../../lib/api';
 import { useRouter } from 'next/navigation';
 
 export default function AdminRequestDetail({ params }: { params: { id: string } }) {
@@ -11,6 +11,8 @@ export default function AdminRequestDetail({ params }: { params: { id: string } 
   const [templateLink, setTemplateLink] = useState<string | null>(null);
   const [templateDraft, setTemplateDraft] = useState('');
   const [verified, setVerified] = useState(false);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -75,6 +77,30 @@ export default function AdminRequestDetail({ params }: { params: { id: string } 
     }
   };
 
+  const handleFileUpload = async () => {
+    if (!selectedFile) return;
+
+    try {
+      setUploadingFile(true);
+      await uploadTranscriptFile(params.id, selectedFile);
+      const d = await api(`/requests/admin/${params.id}`);
+      setR(d.request);
+      setSelectedFile(null);
+    } catch (e: any) {
+      console.error('Upload error:', e);
+      alert('Gagal mengunggah file. Silakan coba lagi.');
+    } finally {
+      setUploadingFile(false);
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+    }
+  };
+
   return (
     <div className="container-narrow py-8">
       <div className="max-w-3xl mx-auto space-y-6">
@@ -118,19 +144,27 @@ export default function AdminRequestDetail({ params }: { params: { id: string } 
           {r?.excelLink ? (
             <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
               <p className="text-sm text-blue-700">
-                <strong>✓ Pengguna telah mengisi form pengumpulan Excel</strong>
+                <strong>✓ Pengguna telah mengunggah file Excel</strong>
               </p>
               <p className="text-xs text-blue-600 mt-1">
                 Status: {r.status === 'APPROVED' ? 'Sheet Diunggah Pengguna' : 'Sedang Diproses'}
               </p>
+              <a
+                href={r.excelLink}
+                target="_blank"
+                rel="noreferrer"
+                className="btn-secondary mt-2 block text-center"
+              >
+                Lihat File Excel
+              </a>
             </div>
           ) : (
             <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
               <p className="text-sm text-yellow-700">
-                <strong>⚠ Pengguna belum mengisi form pengumpulan Excel</strong>
+                <strong>⚠ Pengguna belum mengunggah file Excel</strong>
               </p>
               <p className="text-xs text-yellow-600 mt-1">
-                Status: Menunggu pengguna mengisi form
+                Status: Menunggu pengguna mengunggah file
               </p>
             </div>
           )}
@@ -138,19 +172,46 @@ export default function AdminRequestDetail({ params }: { params: { id: string } 
 
         {/* Verification section */}
         <div className="card space-y-4">
-          <div className="font-medium">Verifikasi Transkrip</div>
+          <div className="font-medium">Upload Transkrip Terverifikasi</div>
           <div className="space-y-3">
             <p className="text-sm text-gray-600">
-              Admin akan mengunggah transkrip terverifikasi ke Google Drive. Klik tautan di bawah untuk mengakses folder upload.
+              Upload file transkrip yang telah diverifikasi. File akan disimpan di R2 storage.
             </p>
-            <a
-              href="https://bit.ly/3TDKZFn"
-              target="_blank"
-              rel="noreferrer"
-              className="btn block text-center"
-            >
-              Buka Folder Upload Google Drive
-            </a>
+
+            {r?.transcriptUrl ? (
+              <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                <p className="text-sm text-green-700 font-medium">
+                  ✓ Transkrip telah diunggah
+                </p>
+                <a
+                  href={r.transcriptUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn-secondary mt-2 block text-center"
+                >
+                  Lihat Transkrip
+                </a>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    onChange={handleFileSelect}
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  />
+                </div>
+                <button
+                  className="btn w-full"
+                  onClick={handleFileUpload}
+                  disabled={uploadingFile || !selectedFile}
+                >
+                  {uploadingFile ? 'Mengunggah...' : 'Upload Transkrip'}
+                </button>
+              </div>
+            )}
+
             {verified ? (
               <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg text-center">
                 <p className="text-sm text-green-700 font-medium">
@@ -163,12 +224,12 @@ export default function AdminRequestDetail({ params }: { params: { id: string } 
             ) : (
               <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <p className="text-sm text-yellow-700 mb-3">
-                  <strong>Penting:</strong> Setelah mengunggah transkrip ke Google Drive, klik tombol verifikasi di bawah untuk menandai permohonan sebagai selesai.
+                  <strong>Penting:</strong> Setelah mengunggah transkrip, klik tombol verifikasi di bawah untuk menandai permohonan sebagai selesai.
                 </p>
                 <button
                   className="btn-success w-full"
                   onClick={verifyTranscript}
-                  disabled={saving}
+                  disabled={saving || !r?.transcriptUrl}
                 >
                   {saving ? 'Memverifikasi...' : 'Verifikasi Transkrip (Tandai Selesai)'}
                 </button>

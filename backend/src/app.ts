@@ -2,6 +2,7 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import helmet from 'helmet';
+import multer from 'multer';
 import { env } from './config/env';
 import routes from './routes';
 import { prisma } from './config/db';
@@ -10,6 +11,24 @@ const app = express();
 app.use(helmet());
 app.use(express.json());
 app.use(cookieParser());
+
+// Configure multer for file uploads
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    // Allow Excel files and PDFs
+    if (file.mimetype === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+      file.mimetype === 'application/vnd.ms-excel' ||
+      file.mimetype === 'application/pdf') {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Only Excel and PDF files are allowed.'));
+    }
+  },
+});
 // CORS configuration with better handling for different environments
 const corsOptions = {
   origin: env.isProduction
