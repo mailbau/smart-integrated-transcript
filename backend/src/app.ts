@@ -10,9 +10,45 @@ const app = express();
 app.use(helmet());
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors({ origin: env.clientOrigin, credentials: true }));
+// CORS configuration with better handling for different environments
+const corsOptions = {
+  origin: env.isProduction
+    ? [env.clientOrigin, 'https://your-production-domain.com'] // Add your production domain
+    : [env.clientOrigin, 'http://localhost:3000', 'http://127.0.0.1:3000'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+};
+
+app.use(cors(corsOptions));
 
 app.get('/health', (_req, res) => res.json({ ok: true }));
+
+// Debug endpoint to check JWT configuration
+app.get('/debug/jwt', (_req, res) => {
+  res.json({
+    jwtSecret: env.jwtSecret ? 'set' : 'not set',
+    jwtSecretLength: env.jwtSecret?.length || 0,
+    isDefaultSecret: env.jwtSecret === 'devsecret',
+    nodeEnv: process.env.NODE_ENV,
+    clientOrigin: env.clientOrigin,
+    isProduction: env.isProduction,
+    cookieDomain: process.env.COOKIE_DOMAIN || 'not set'
+  });
+});
+
+// Test endpoint to check if cookies are being set properly
+app.get('/debug/cookies', (req, res) => {
+  res.json({
+    cookies: req.cookies,
+    headers: {
+      'user-agent': req.headers['user-agent'],
+      'origin': req.headers.origin,
+      'referer': req.headers.referer
+    }
+  });
+});
+
 app.use('/api', routes);
 
 // simple seed admin endpoint (disable after first run)

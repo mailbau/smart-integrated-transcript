@@ -3,8 +3,21 @@ import { prisma } from '../config/db';
 import { hashPassword, comparePassword } from '../utils/password';
 import { signJwt } from '../utils/jwt';
 
-const cookieOptsDev = { httpOnly: true as const, sameSite: 'lax' as const };
-const cookieOptsProd = { httpOnly: true as const, sameSite: 'none' as const, secure: true };
+const cookieOptsDev = {
+  httpOnly: true as const,
+  sameSite: 'lax' as const,
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+  path: '/',
+  domain: process.env.COOKIE_DOMAIN || undefined
+};
+const cookieOptsProd = {
+  httpOnly: true as const,
+  sameSite: 'none' as const,
+  secure: true,
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
+  path: '/',
+  domain: process.env.COOKIE_DOMAIN || undefined
+};
 const cookieOpts = process.env.NODE_ENV === 'production' ? cookieOptsProd : cookieOptsDev;
 
 export async function register(req: Request, res: Response) {
@@ -115,6 +128,13 @@ export function me(req: Request, res: Response) {
 }
 
 export function logout(req: Request, res: Response) {
-  res.clearCookie('token');
+  // Clear cookie with same options used for setting
+  res.clearCookie('token', {
+    httpOnly: true,
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+    domain: process.env.COOKIE_DOMAIN || undefined
+  });
   res.json({ message: 'ok' });
 }

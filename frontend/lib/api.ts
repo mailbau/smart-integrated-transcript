@@ -30,3 +30,12 @@ export async function getTemplateLink(): Promise<string | null> {
   const data = await res.json();
   return data.templateLink || null;
 }
+
+// Debug function to check JWT configuration
+export async function debugJwt() {
+  const res = await fetch(`${API_URL.replace('/api', '')}/debug/jwt`, {
+    credentials: 'include'
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}

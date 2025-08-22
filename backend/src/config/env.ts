@@ -5,5 +5,5 @@ export const env = {
   databaseUrl: process.env.DATABASE_URL!,
   jwtSecret: process.env.JWT_SECRET || 'devsecret',
   clientOrigin: process.env.CLIENT_ORIGIN || 'http://localhost:3000',
-
+  isProduction: process.env.NODE_ENV === 'production',
 };

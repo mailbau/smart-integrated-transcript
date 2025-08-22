@@ -27,7 +27,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
             const response = await api('/auth/me');
             setUser(response.user);
-        } catch (error) {
+        } catch (error: any) {
+            console.log('Auth check failed:', error.message);
             setUser(null);
         } finally {
             setLoading(false);
