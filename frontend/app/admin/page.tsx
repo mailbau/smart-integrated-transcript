@@ -69,7 +69,7 @@ export default function AdminDashboard() {
     const statusMap: { [key: string]: { label: string; className: string } } = {
       'SUBMITTED': { label: 'Diajukan', className: 'border-blue-300 bg-blue-50 text-blue-700' },
       'UNDER_REVIEW': { label: 'Sedang Diproses', className: 'border-yellow-300 bg-yellow-50 text-yellow-700' },
-      'APPROVED': { label: 'Disetujui', className: 'border-green-300 bg-green-50 text-green-700' },
+      'APPROVED': { label: 'Verifikasi Diajukan', className: 'border-green-300 bg-green-50 text-green-700' },
       'REJECTED': { label: 'Ditolak', className: 'border-red-300 bg-red-50 text-red-700' },
       'COMPLETED': { label: 'Selesai', className: 'border-green-300 bg-green-50 text-green-700' }
     };

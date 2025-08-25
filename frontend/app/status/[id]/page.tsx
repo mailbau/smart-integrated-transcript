@@ -89,7 +89,7 @@ export default function StatusPage({ params }: { params: { id: string } }) {
     const steps = [
       { id: 'submitted', label: 'Pengajuan Diterima', completed: true, date: r?.createdAt },
       { id: 'processing', label: 'Sedang Diproses', completed: status !== 'SUBMITTED', date: r?.underReviewAt },
-      { id: 'approved', label: 'Sheet Diunggah Pengguna', completed: status === 'APPROVED' || status === 'COMPLETED', date: r?.approvedAt },
+      { id: 'approved', label: 'Verifikasi Diajukan', completed: status === 'APPROVED' || status === 'COMPLETED', date: r?.approvedAt },
       { id: 'completed', label: 'Selesai', completed: status === 'COMPLETED', date: r?.completedAt }
     ];
     return steps;

@@ -147,7 +147,7 @@ export default function AdminRequestDetail({ params }: { params: { id: string } 
                 <strong>✓ Pengguna telah mengunggah file Excel</strong>
               </p>
               <p className="text-xs text-blue-600 mt-1">
-                Status: {r.status === 'APPROVED' ? 'Sheet Diunggah Pengguna' : 'Sedang Diproses'}
+                Status: {r.status === 'APPROVED' ? 'Verifikasi Diajukan' : 'Sedang Diproses'}
               </p>
               <a
                 href={r.excelLink}
